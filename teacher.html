@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Teacher Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  tr:hover { background-color: #f0f0f0; cursor: pointer; }
+  h2, h3 { margin-top: 40px; }
+</style>
+</head>
+<body>
+  <h2>Teacher Dashboard</h2>
+  <h3>Student List</h3>
+  <table id="studentTable">
+    <thead>
+      <tr><th>Name</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="familyDetails"></div>
+
+  <script>
+    const students = JSON.parse(localStorage.getItem('students') || '[]');
+    const familyData = JSON.parse(localStorage.getItem('familyData') || '{}');
+    const tbody = document.querySelector('#studentTable tbody');
+    const familyDiv = document.getElementById('familyDetails');
+
+    if(localStorage.getItem('currentUser') !== 'teacher') {
+      alert('Unauthorized access! Please login as teacher.');
+      window.location.href = 'index.html';
+    }
+
+    function loadStudents() {
+      tbody.innerHTML = '';
+      students.forEach(name => {
+        const tr = document.createElement('tr');
+        tr.textContent = name;
+        tr.onclick = () => showFamily(name);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showFamily(name) {
+      familyDiv.innerHTML = `<h3>Family Details for ${name}</h3>`;
+
+      if(!familyData[name] || familyData[name].length === 0) {
+        familyDiv.innerHTML += '<p>No family details submitted yet.</p>';
+        return;
+      }
+
+      let html = '<table><thead><tr><th>Member Name</th><th>Relationship</th><th>Age</th></tr></thead><tbody>';
+      familyData[name].forEach(member => {
+        html += `<tr><td>${member.name}</td><td>${member.relationship}</td><td>${member.age}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      familyDiv.innerHTML += html;
+    }
+
+    loadStudents();
+  </script>
+</body>
+</html>

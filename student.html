@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Student Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 20px auto; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  tr:hover { background-color: #f0f0f0; cursor: pointer; }
+  button { margin-top: 15px; padding: 10px; }
+</style>
+</head>
+<body>
+  <h2>Welcome, <span id="studentName"></span></h2>
+
+  <button onclick="addStudent()">Add Myself to Class List</button>
+
+  <h3>Class Student List</h3>
+  <table id="studentTable">
+    <thead>
+      <tr><th>Name</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const currentUser = localStorage.getItem('currentUser');
+    if(!currentUser) {
+      alert('Please login first');
+      window.location.href = 'index.html';
+    }
+    document.getElementById('studentName').textContent = currentUser;
+
+    function loadStudents() {
+      const students = JSON.parse(localStorage.getItem('students') || '[]');
+      const tbody = document.querySelector('#studentTable tbody');
+      tbody.innerHTML = '';
+
+      students.forEach(name => {
+        const tr = document.createElement('tr');
+        tr.textContent = name;
+        tr.onclick = () => {
+          if(name === currentUser) {
+            // Only allow student to open their own family details form
+            window.location.href = 'family.html?student=' + encodeURIComponent(name);
+          } else {
+            alert('You can only edit your own family details.');
+          }
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addStudent() {
+      let students = JSON.parse(localStorage.getItem('students') || '[]');
+      if(!students.includes(currentUser)) {
+        students.push(currentUser);
+        localStorage.setItem('students', JSON.stringify(students));
+        loadStudents();
+        alert('Added to student list!');
+      } else {
+        alert('You are already in the student list.');
+      }
+    }
+
+    loadStudents();
+  </script>
+</body>
+</html>

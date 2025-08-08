@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Family Details</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 20px auto; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  input { width: 100%; box-sizing: border-box; }
+  button { margin-top: 15px; padding: 10px; }
+</style>
+</head>
+<body>
+  <h2>Family Details</h2>
+  <div id="studentName"></div>
+
+  <table id="familyTable">
+    <thead>
+      <tr>
+        <th>Member Name</th>
+        <th>Relationship</th>
+        <th>Age</th>
+        <th><button onclick="addRow()">Add Family Member</button></th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows added dynamically -->
+    </tbody>
+  </table>
+
+  <button onclick="saveFamily()">Save Family Details</button>
+
+  <script>
+    // Get student name from query string
+    const params = new URLSearchParams(window.location.search);
+    const student = params.get('student');
+    if(!student) {
+      alert('No student specified.');
+      window.location.href = 'index.html';
+    }
+    document.getElementById('studentName').textContent = 'Student: ' + student;
+
+    const familyTableBody = document.querySelector('#familyTable tbody');
+
+    function addRow(member = {}) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" value="${member.name || ''}" placeholder="Name" /></td>
+        <td><input type="text" value="${member.relationship || ''}" placeholder="Relationship" /></td>
+        <td><input type="number" value="${member.age || ''}" placeholder="Age" min="0" /></td>
+        <td><button onclick="removeRow(this)">Remove</button></td>
+      `;
+      familyTableBody.appendChild(tr);
+    }
+
+    function removeRow(button) {
+      button.closest('tr').remove();
+    }
+
+    function loadFamily() {
+      const allFamilies = JSON.parse(localStorage.getItem('familyData') || '{}');
+      if(allFamilies[student]) {
+        allFamilies[student].forEach(member => addRow(member));
+      } else {
+        addRow(); // add empty row initially
+      }
+    }
+
+    function saveFamily() {
+      const allFamilies = JSON.parse(localStorage.getItem('familyData') || '{}');
+      const rows = familyTableBody.querySelectorAll('tr');
+      const familyMembers = [];
+
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const name = inputs[0].value.trim();
+        const relationship = inputs[1].value.trim();
+        const age = inputs[2].value.trim();
+
+        if(name && relationship && age) {
+          familyMembers.push({ name, relationship, age });
+        }
+      });
+
+      if(familyMembers.length === 0) {
+        alert('Please add at least one family member.');
+        return;
+      }
+
+      allFamilies[student] = familyMembers;
+      localStorage.setItem('familyData', JSON.stringify(allFamilies));
+      alert('Family details saved!');
+    }
+
+    loadFamily();
+  </script>
+</body>
+</html>
